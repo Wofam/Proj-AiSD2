@@ -1,1 +1,221 @@
 # Problem 1
+from collections import deque
+from functools import cmp_to_key
+
+class BipartiteGraph:
+    def __init__(self, num_vertices, set1, set2):
+        self.num_vertices = num_vertices # ilosc wierzcholkow
+        self.adj_matrix = [[0] * num_vertices for _ in range(num_vertices)] # macierz sasiedztwa z zainicjalizowana wartoscia 0
+        self.set1 = set(set1) # Pierwszy zbior wierzcholkow
+        self.set2 = set(set2) # Drugi zbior wierzcholkow
+
+        # Sprawdzenie, czy zbiory są rozłączne i kompletne
+        if not self.set1.isdisjoint(self.set2):
+            raise ValueError("Zbiory set1 i set2 nie są rozłączne.")
+        if len(self.set1) + len(self.set2) != num_vertices:
+            raise ValueError("Liczba wierzchołków w set1 i set2 nie odpowiada liczbie wierzchołków w grafie.")
+
+    def add_edge(self, v1, v2):
+        # Dodajemy krawędź między wierzchołkiem v1 i v2 (graf dwudzielny)
+        if (v1 in self.set1 and v2 in self.set2) or (v1 in self.set2 and v2 in self.set1):
+            if 0 <= v1 < self.num_vertices and 0 <= v2 < self.num_vertices:
+                self.adj_matrix[v1][v2] = 1
+                self.adj_matrix[v2][v1] = 1
+        else:
+            raise ValueError("Krawędź nie spełnia wymagań grafu dwudzielnego.")
+
+    def display_adj_matrix(self):
+        # Wyświetlanie macierzy sąsiedztwa
+        for row in self.adj_matrix:
+            print(row)
+
+class FlowNetwork:
+    def __init__(self, bipartite_graph, set1, set2):
+        self.num_vertices = bipartite_graph.num_vertices + 2  # +2 dla źródła i ujścia
+        self.source = bipartite_graph.num_vertices # Za indeks zrodla bierzmy wartosc num_verticies
+        self.sink = bipartite_graph.num_vertices + 1 # Za indeks ujscia bierzemy wartosc num_verticies + 1
+        self.adj_matrix = [[0] * self.num_vertices for _ in range(self.num_vertices)]
+        # Tworzymy macierz sasiedztwa z zainicjalizowanymi zerami
+        
+        # Przepisujemy krawędzie z grafu dwudzielnego
+        for i in range(bipartite_graph.num_vertices):
+            for j in range(bipartite_graph.num_vertices):
+                if bipartite_graph.adj_matrix[i][j] == 1:
+                    self.adj_matrix[i][j] = 1
+
+        # Dodajemy krawędzie ze źródła do set1 i z set2 do ujścia
+        for v in set1:
+            self.adj_matrix[self.source][v] = 1
+        for v in set2:
+            self.adj_matrix[v][self.sink] = 1
+
+    def bfs(self, parent):
+        visited = [False] * self.num_vertices # Inicjalizujemy liste odwiedzonych wierzcholkow na false
+        queue = deque([self.source]) # Inicjalizacja kolejki deque z collections z pierwszym elementem source
+        visited[self.source] = True
+
+        while queue:
+            u = queue.popleft()
+
+            for v in range(self.num_vertices):
+                if not visited[v] and self.adj_matrix[u][v] > 0:  # istnieje przepustowość
+                    queue.append(v) # Dodajemy do kolejki
+                    visited[v] = True
+                    parent[v] = u # Przypisujemy u jako rodzica v
+
+                    if v == self.sink:
+                        return True #Jezeli dotarlismy do zrodla zwracamy True
+        return False
+
+    def edmonds_karp(self):
+        parent = [-1] * self.num_vertices #tworzenie listy rodzicow z wartoscia -1 dla kazdego wierzcholka 
+        max_flow = 0
+
+        while self.bfs(parent):
+            path_flow = float('Inf') # zaczynamy od wartosci nieskonczonosci
+            s = self.sink
+
+            while s != self.source: 
+                path_flow = min(path_flow, self.adj_matrix[parent[s]][s]) 
+                s = parent[s]
+
+            max_flow += path_flow
+
+            v = self.sink
+            while v != self.source:
+                u = parent[v]
+                self.adj_matrix[u][v] -= path_flow # Aktualizowanie przeplywu w macierzy sasiedztwa
+                self.adj_matrix[v][u] += path_flow 
+                v = parent[v]
+
+        return max_flow
+
+
+# klasa do przechowywania wartosci xi y punktów
+class Point:
+    def __init__(self, x=None, y=None):
+        self.x = x
+        self.y = y
+
+# Punkt globalny do ktorego odnosimy sie przy sortowaniu 
+p0 = Point(0, 0)
+
+# funkcja zwracajaca przedostatni punkt na stosie
+def nextToTop(S):
+    return S[-2]
+
+# Funkcja liczącza odleglosci miedzy punktami
+def distSq(p1, p2):
+    return ((p1.x - p2.x) * (p1.x - p2.x) +
+            (p1.y - p2.y) * (p1.y - p2.y))
+
+# Funkcja znajdujaca wzajemne połozenie punktów p, q, r
+# 0 - p, q, r są współliniowe
+# 1 - p, q, r są zgodnie ze wskazówkami zegara (po prawej)
+# 2 - p, q, r są odwrotnie do ruchu wskazówek zegara (po lewej)
+def orientation(p, q, r):
+    val = ((q.y - p.y) * (r.x - q.x) - # wyznacznik macierzy miedzy punktami 
+           (q.x - p.x) * (r.y - q.y))
+    if val == 0:
+        return 0 # wspoliniowe
+    elif val > 0:
+        return 1 # po prawej
+    else:
+        return 2 # po lewej
+
+# Funkcja ktora bedzie potrzebna do uzycia cmp_to_key ktore wykorzystamy do sortowania punktow
+def compare(p1, p2):
+    o = orientation(p0, p1, p2)
+    if o == 0:
+        if distSq(p0, p2) >= distSq(p0, p1): # jezeli punkty sa wspoliniowe trzeba obliczyc ktory jest dalej od p0
+            return -1 # p1 jest blizej (p1 ustawiamy przed p2)
+        else:
+            return 1 # p2 jest blizej (p2 ustawiamy przed p1)
+    else:
+        if o == 2:
+            return -1 # p2 jest po lewej (p1 ustawiamy przed p2)
+        else:
+            return 1 # p2 jest po prawej (p2 ustawiamy przed p1)
+
+# Liczymy otoczke wypukla dla n punktow 
+def convexHull(points, n):
+    global p0
+
+    # Znajdowanie punktu najnizej w ukladzie wspolrzednych
+    ymin = points[0].y
+    min = 0
+    for i in range(1, n):
+        y = points[i].y
+        # Jezeli punkty sa na tej samej wysokosci bierzemy ten najbardziej po lewej
+        if ((y < ymin) or
+            (ymin == y and points[i].x < points[min].x)):
+            ymin = points[i].y
+            min = i
+            
+    # Ustawiamy najnizszy punkt na poczatku listy
+    points[0], points[min] = points[min], points[0]
+    
+    p0 = points[0] # Za p0 przyjmujemy nasz najnizszy punkt
+    points = [points[0]] + sorted(points[1:], key=cmp_to_key(compare))
+    # Zostawiamy p0 na swoim miejscu a nastepnie sortujemy pozostale wzgledem porownania ustalonego powyzej
+    
+    # Tworzymy stos i wrzucamy trzy pierwsze punkty
+    S = []
+    S.append(points[0])
+    S.append(points[1])
+    S.append(points[2])
+    
+    for i in range(3, n):
+        # Sprawdzamy orientacje miedzy nextToTop, Top i kolejnym punktem 
+        while ((len(S) > 1) and
+               (orientation(nextToTop(S), S[-1], points[i]) != 2)):
+            S.pop() # Zdejmujemy top jesli punkt NIE jest po lewej stronie
+        S.append(points[i])
+
+    # Wypisywanie punktow ktore pozostaly na stosie tzn naleza do otoczki
+    print ("Punkty ktore nalezy odwiedzic do budowy plotu: ")
+    while S:
+        p = S.pop()
+        print("(" + str(p.x) + ", " + str(p.y) + ")")
+
+
+# Przykład użycia:
+num_vertices = 8
+set1 = [0, 1, 2, 6]
+set2 = [3, 4, 5, 7]
+
+bipartite_graph = BipartiteGraph(num_vertices, set1, set2)
+bipartite_graph.add_edge(0, 3)
+bipartite_graph.add_edge(0, 4)
+bipartite_graph.add_edge(1, 4)
+bipartite_graph.add_edge(2, 5)
+bipartite_graph.add_edge(6, 5)
+bipartite_graph.add_edge(6, 7)
+
+
+print("Macierz sąsiedztwa grafu dwudzielnego:")
+bipartite_graph.display_adj_matrix()
+
+flow_network = FlowNetwork(bipartite_graph, set1, set2)
+
+print("\nMacierz sąsiedztwa sieci przepływowej:")
+for row in flow_network.adj_matrix:
+    print(row)
+
+max_flow = flow_network.edmonds_karp()
+print("\nMaksymalny przepływ w sieci:", max_flow)
+
+# Przykladowe punkty do otoczki
+input_points = [(13,5),(12,8),(11,3),(10,10),(9,4),(6,10),(7,7),(5,4),(5,1),(2,5),(3,7),(1,9)]
+#input_points = [(2,2),(2,4),(4,4),(6,6),(8,8),(3,6),(0,0)]
+#input_points = [(2,2),(0,4),(6,2),(8,2)]
+#input_points = [(2,2),(0,4),(6,2),(8,2),(4,0)]
+
+
+points = []
+for point in input_points:
+    points.append(Point(point[0], point[1]))
+n = len(points)
+convexHull(points, n)
+
+
