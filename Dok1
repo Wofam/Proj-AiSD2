@@ -1,1 +1,37 @@
 # Dokumentacja do problemu 1
+  1. Informacje istnotnie w problemie:
+  - Ilość dostępnych płaszczaków
+	- Podział płaszczaków na mających ręce z przodu i ręce z tyłu
+	- Relacje między płaszczakami 
+	- Punkty na płaszczyźnie 
+  2. Specifikacja problemu
+	Dane wejściowe:
+		num_vertices – liczba naturalna (oznacza ilość płaszczaków)
+    set1 – Zbiór liczb naturalnych mniejszych od num_vertices rozłączny ze zbiorem set2 (Zbiór płaszczaków mających ręce z przodu)
+    set2 - Zbiór liczb naturalnych mniejszych od num_vertices rozłączny ze zbiorem set1 (Zbiór płaszczaków mających ręce z tyłu)
+    add.edge – po jednej liczbie ze zbioru set1 oraz set2 (Oznaczenie że płaszczaki się lubią)
+    input_points – Zbiór punktów na płaszczyźnie (Potencjalne miejsca na budowę płotu)
+	Dane wyjściowe:
+    Maksymalny przepływ w sieci – liczba naturalna (Maksymalna ilość par płaszczaków połączonych w pary)
+    Otoczka wypukła – Lista punktów (Najmniejsza możliwa ilość punktów potrzebna do budowy płotu)
+  3. Uzyte struktury i algorytmy
+	Klasa BipartiteGraph: (Graf dwudzielny)
+		Pola:
+		  self.num_vertices (ilość wierzchołków w grafie dwudzielnym)
+      self.adj_matrix (macierz sąsiedztwa tego grafu)
+      self.set1 (Pierwszy zbiór punktów)
+      self.set2 (Drugi zbiór punktów)
+		Metody:
+      def add_edge(self, v1, v2) (Metoda dodająca krawędź)
+      def display_adj_matrix(self) (Metoda wyświetlająca macierz sąsiedztwa zadanego grafu)
+  Klasa FlowNetwork: (Sieć przepływowa)
+	  Pola:
+	    self.num_vertices (Ilość wierzchołków w sieci przepływowej)
+      self.source (Indeks źródła sieci przepływowej)    
+    	self.sink (Indeks ujścia sieci przepływowej)
+      self.adj_matrix (Macierz sąsiedztwa sieci przepływowej)
+	  Metody:
+	    def bfs(self, parent) (Algorytm BFS do wyszukiwania ścieżek ze źródła do ujścia)
+      def edmonds_karp(self): (Algorytm Edmondsa-Karpa do liczenia maksymalnego przepływu w sieci przepływowej)
+	Funkcja convexHull (Wyszukiwanie otoczki wypukłej za pomocą algorytmu Grahama)
+
