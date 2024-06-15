@@ -6,9 +6,23 @@
   - Zmienić przed zapisem słowo "poli" na "boli" w opowieści-melodii (odpowiednio wyszukać słowo i je zastąpić);
   - Znaleźć ewentualne zmiany opowieści-melodii (możliwość wyszukania dowolnego słowa wzorca);
 
+	Sformalizowany problem: Program ma za zadanie znaleźć w łańcuchu znaków wzorzec "poli" i zamienić go na słowo "boli". Dodatkowo ma mieć możliwość sprawdzenia innego, dowolnego wzorac (łańcucha znaków) w tekście.
+	Po dokonanych wszystkich modyfikacjach tekstu, program ma go zakodować do postaci ciągu bitów ze szczególnym naciskiem na oszczędność miejsca wymaganego do zapisu tzn. uzyskać możliwie jak najmniejszą ilość bitów.
+
   2. specifikacja problemu
-  Dane wejściowe:
-    "Opowieść-melodia" 
+  Wejście:
+	text, pattern, replacemnt - ciągi dowolnych znaków o dowolnej długości, reprezentujące odpowiednio:
+		- "opowieść-melodię", tekst, który przeszukujemy i ewentualnie zmieniamy;
+		- wzorzec, który wyszukujemy w tekście;
+		- zamiennik wzorca;
+
+  Wyjście:
+	- tablica zawierająca numery indeksów, w których wzorzec zaczyna się w tekście;
+	- zmodyfikowany tekst (podmieniony wzorzec na zamiennik);
+	- ciąg binarny (zakodowany tekst);
 
   3. uzyte struktury i algorytmy
-  #tekst
+  Algorytm Huffmana
+	- algorytm korzystający z kodowanie bezprzystankowego, czyli zastępowaniu znaków ciągami bitów o różnej długości (zamiast kodowania stałego użytego przez Informatyka) do kompresji i zakodowania tekstu
+  Algorytm Boyera-Moore'a
+	- algorytm 
