@@ -1,2 +1,218 @@
-#Problem 2
-check
+from random import choice
+from string import ascii_letters
+
+# Klasa reprezentująca węzeł drzewa Huffmana
+class HTNode:
+    def __init__(self, ch='', count=0, left=None, right=None, next=None):
+        self.ch = ch  # Znak
+        self.count = count  # Ilość wystąpień znaku
+        self.left = left  # Lewy węzeł
+        self.right = right   #Prawy węzeł
+        self.next = next  # Następny węzeł na liście
+
+# Funkcja tworząca posortowaną listę węzłów na podstawie liczby wystąpień znaków w ciągu s
+def make_list(root, s):
+    root = None
+    for ch in s:
+        p = root
+        while p and p.ch != ch:
+            p = p.next
+        if not p:
+            p = HTNode(ch=ch)
+            p.next = root
+            root = p
+        p.count += 1
+
+    # Sortowanie listy na podstawie liczby wystąpień
+    sorted_list = None
+    while root:
+        p = root
+        root = root.next
+        if not sorted_list or p.count <= sorted_list.count:
+            p.next = sorted_list
+            sorted_list = p
+        else:
+            q = sorted_list
+            while q.next and p.count > q.next.count:
+                q = q.next
+            p.next = q.next
+            q.next = p
+    
+    return sorted_list
+
+# Funkcja tworząca drzewo Huffmana z posortowanej listy węzłów
+def make_tree(root):
+    while root and root.next:
+        v1 = root
+        v2 = v1.next
+        root = v2.next
+
+        p = HTNode(left=v1, right=v2, count=v1.count + v2.count)
+
+        if not root or p.count <= root.count:
+            p.next = root
+            root = p
+        else:
+            r = root
+            while r.next and p.count > r.next.count:
+                r = r.next
+            p.next = r.next
+            r.next = p
+    return root
+
+# Funkcja wyświetlająca drzewo Huffmana i przypisane kody binarne dla każdego znaku
+def print_tree(p, b):
+    if not p.left and not p.right:
+        print(f'{p.ch} {b}')
+    else:
+        if p.left:
+            print_tree(p.left, b + '0')
+        if p.right:
+            print_tree(p.right, b + '1')
+
+
+# Funkcja kodująca pojedynczy znak na podstawie drzewa Huffmana (zwracająca wynik)
+def code_t_with_result(c, p, b):
+    if not p.left and not p.right:
+        if c != p.ch:
+            return ''
+        else:
+            return b
+    else:
+        return code_t_with_result(c, p.left, b + '0') or code_t_with_result(c, p.right, b + '1')
+
+# Funkcja kodująca ciąg znaków na podstawie drzewa Huffmana
+def code_huffman(root, s):
+    encoded_str = ''
+    for ch in s:
+        result = code_t_with_result(ch, root, '')
+        encoded_str += result
+    return encoded_str
+
+# Funkcja dekodująca zakodowany ciąg na podstawie drzewa Huffmana
+def decode_huffman(encoded_str, root):
+    decoded_str = ''
+    node = root
+    for bit in encoded_str:
+        if bit == '0':
+            node = node.left
+        else:
+            node = node.right
+
+        if not node.left and not node.right:
+            decoded_str += node.ch
+            node = root
+    return decoded_str
+
+
+# Funkcja pomocnicza do algorytmu Boyera-Moore'a obliczająca prefiksy
+def prefix_prefix(w, m):
+    def naive_scan(i, j):
+        r = 0
+        while i + r < m and j + r < m and w[i + r] == w[j + r]:
+            r += 1
+        return r
+
+    PREF, s = [-1] * 2 + [0] * (m - 1), 1
+    for i in range(2, m + 1):
+        k = i - s + 1
+        s_max = s + PREF[s] - 1
+        if s_max < i:
+            PREF[i] = naive_scan(i - 1, 0)
+            if PREF[i] > 0:
+                s = i
+        elif PREF[k] + k - 1 < PREF[s]:
+            PREF[i] = PREF[k]
+        else:
+            PREF[i] = (s_max - i + 1) + naive_scan(s_max, s_max - i + 1)
+            s = i
+    PREF[1] = m
+    return PREF
+
+# Funkcja obliczająca maksymalne sufiksy wzorca
+def maximum_suffixes(w, m):
+    w_rev = w[::-1]
+    PREF = prefix_prefix(w_rev, m)
+    S = [PREF[0]] + PREF[-1:0:-1]
+    return S
+
+# Funkcja obliczająca przesunięcia w algorytmie Boyera-Moore'a
+def boyer_moore_shift(w, m):
+    B = prefix_prefix(w, m)
+    BM = [m - B[m]] + [m] * m
+    S, j = maximum_suffixes(w, m), 0
+    for k in range(m - 1, -1, -1):
+        if k == S[k]:
+            while j < m - k:
+                BM[j] = m - k
+                j += 1
+    for k in range(1, m):
+        BM[m - S[k]] = m - k
+    return BM
+
+# Główna funkcja implementująca algorytm Boyera-Moore'a
+def boyer_moore(t, w, n, m):
+    BM = boyer_moore_shift(w, m)
+    i = 0
+    while i <= n - m:
+        j = m - 1
+        while j >= 0 and t[i + j] == w[j]:
+            j -= 1
+        if j < 0:
+            yield i
+            i += BM[0]
+        else:
+            i += BM[j + 1]
+
+# Funkcja zamieniająca wzorzec na podany przez użytkownika ciąg znaków
+def replace_pattern(text, pattern, replacement):
+    n = len(text)
+    m = len(pattern)
+    result = list(boyer_moore(text, pattern, n, m))
+
+    if not result:
+        print("Nie znaleziono wzorca w tekście.")
+        return text
+
+    # Zamiana wszystkich wystąpień wzorca
+    offset = 0
+    for index in result:
+        index += offset
+        text = text[:index] + replacement + text[index + m:]
+        offset += len(replacement) - m
+
+    return text
+
+def get_random_string(length):
+    result_str = ''.join(choice(ascii_letters) for i in range(length))
+    return result_str
+
+
+# Przykładowe użycie funkcji
+text = get_random_string(20)
+pattern = "ab"
+replacement = "XYZ"
+print("Oryginalny tekst:", text)
+print("Wzorzec do wyszukania i zastąpienia:", pattern)
+print("Zastępstwo wzorca:", replacement)
+
+# Zastępowanie wzorca w tekście
+replaced_text = replace_pattern(text, pattern, replacement)
+print("Zmodyfikowany tekst:", replaced_text)
+
+# Tworzenie drzewa Huffmana dla zmodyfikowanego tekstu
+root = None
+s = replaced_text
+root = make_list(root, s)
+root = make_tree(root)
+print("Kody poszczególnych znaków:")
+print_tree(root, "")
+
+# Kodowanie i dekodowanie zmodyfikowanego tekstu za pomocą algorytmu Huffmana
+encoded_str = code_huffman(root, s)
+print("\nZakodowany tekst:")
+print(encoded_str)
+
+decoded_str = decode_huffman(encoded_str, root)
+print("\nOdkodowany tekst:")
+print(decoded_str)
