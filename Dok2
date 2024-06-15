@@ -1,1 +1,14 @@
 # Dokumentacja do problemu 2
+
+  1. informacje istnotnie w problemie:
+  - Heretyk chce zachować opowieść-melodię za pomocą maszyny Informatyka, która zapisuje tylko 0 oraz 1 (ciąg binarny);
+  - Informatyk próbował wcześniej zapisać opowieść-melodię, ale nie miał wystarczającej ilości miejsca przez użyte kodowanie (użył kodowania o stałej długości);
+  - Zmienić przed zapisem słowo "poli" na "boli" w opowieści-melodii (odpowiednio wyszukać słowo i je zastąpić);
+  - Znaleźć ewentualne zmiany opowieści-melodii (możliwość wyszukania dowolnego słowa wzorca);
+
+  2. specifikacja problemu
+  Dane wejściowe:
+    "Opowieść-melodia" 
+
+  3. uzyte struktury i algorytmy
+  #tekst
