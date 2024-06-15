@@ -1,1 +1,86 @@
 #Problem 3
+
+# wybor straznika o najwiekszej ilosci energi
+def wybStraz(energia, poczatek, koniec):
+    return max(energia[poczatek:koniec+1])
+
+# sprawdzenie ile razy musi sie zatrzymac
+def minStops(jasnosc, energia, maksBezStopu):
+    n = len(jasnosc) # ilosc punktow orientacyjnych
+
+    dp = [float('inf')] * n # dp to tabela o wielkosci n
+    dp[0] = 0 # start, zero zatrzyman
+    melodia = 0 # ilosc wysluchania meloddi
+    maksEnergia = energia # maksymalna energia plaszczaka
+
+    # i od 0 do konca plotu
+    for i in range(0, n):
+
+        # jesli plaszczak moze wrocic do punktu 0
+        if i+maksBezStopu>=n:
+            print("MaksBezStopu = ",maksBezStopu,"\naktualne i = ",i)
+            if jasnosc[0]>jasnosc[i]:
+                print("Moze wrocic bez odpoczynku", end='')
+                return melodia
+            else:
+                print("Nie moze wrocic bez odpoczynku", end='')
+                return melodia+1
+
+        # jesli plaszczak nie moze wrocic do punktu 0
+        else:
+
+            # j od aktualnego punktu do maks przejscia bez stopu
+            for j in range(i+maksBezStopu ,i-1, -1):
+                print(" i to teraz ",i, " j to ",j)
+                # istnieje sciezka bez tracenia energii
+                if jasnosc[j] > jasnosc[i]:
+                    i=j;
+                    print("Skok do swiatla w",i,"|",end='')
+                    dp[i] = min(dp[i], dp[j] + 1)
+                    break;
+
+                #  nie istnieje sciezka bez tracenia energii
+                elif j == i:
+                    energia = energia - 1
+                    i = i + maksBezStopu
+                    print("Skok bez swiatla w ",i,end='')
+                    if energia <= 0:
+                        energia = maksEnergia
+                        melodia = melodia + 1
+                    break;
+                else:
+                    print("skip")
+
+    return melodia
+
+
+# Przykladowe dane
+energia = [3, 2, 3, 5, 0, 5, 4]
+punkty = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+jasnosc_punktow = [5, 10, 1, 7, 4, 1, 13, 12, 11, 7, 5, 3, 2, 1, 0]
+poczatkowe_punkty = [0]  # przykładowe grupy początkowych punktów
+
+### Tworzenie losowych danych
+# for i in range(len(energia)):
+#     energia[i] = rand
+# for i in range(len(energia)):
+#     jasnosc_punktow[i] =
+
+grafik = []
+odsluchania = []
+maksBezStopu = 2
+
+for dzien in range(7):
+    poczatek = 0
+    koniec = len(energia) - dzien  # przykładowa liczba płaszczaków do wyboru
+
+    straznik = wybStraz(energia, poczatek, koniec)
+
+    minOdsluchan = minStops(jasnosc_punktow, energia[dzien], maksBezStopu)
+
+    grafik.append(straznik)
+    odsluchania.append(minOdsluchan)
+
+print("\nPlot:\t Punkt =", punkty,"\nJasnosc Punktu =", jasnosc_punktow,"\n\n")
+print("\t   Grafik strazników:", grafik)
+print("Liczba odsluchan melodii:", odsluchania)
