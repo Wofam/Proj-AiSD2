@@ -1,86 +1,205 @@
 #Problem 3
 
-# wybor straznika o najwiekszej ilosci energi
-def wybStraz(energia, poczatek, koniec):
-    return max(energia[poczatek:koniec+1])
+# klasa plaszczaka przechowywuje ilosc energii i urlopy
+class Plaszczak():
+    count = 0
+    def __init__(self, a, tab):
+        Plaszczak.count += 1
+        self.id = Plaszczak.count-1
+        self.energia = a
+        self.wolne = tab
+        self.counterWolne = 0
+    def __str__(self):
+        return f"[{self.id}] en= {self.energia} | wolne={self.wolne}"
+
+
+# klasa kolejki priorytetowej 
+class KolejkaPrio(object):
+
+    # inicjalizacja
+    def __init__(self):
+        self.queue = []
+ 
+    # funkcja "toString"
+    def __str__(self):
+        return ' '.join([str(i) for i in self.queue])
+ 
+    # sprawdzenie czy pusta jest kolejka
+    def isEmpty(self):
+        try:
+            return len(self.queue) == 0
+        except IndexError:
+            print()
+            exit()
+ 
+    # dodanie elementu
+    def insert(self, data):
+        try:
+            self.queue.append(data)
+        except IndexError:
+            print()
+            exit()
+ 
+    # odczytanie indexu maksymalniej wartosci (dlugosc tabeli)
+    def getLen(self):
+        try:
+            return len(self.queue)
+        except IndexError:
+            print()
+            exit()
+
+    # odczytanie maksymalnej wartosci
+    def getTopValue(self, day):
+        try:
+            first_pick = False
+            max_val = 0
+            for i in range(len(self.queue)):
+                if first_pick == False and i == len(self.queue)-1:
+                    self.id = -1
+                    return False
+                elif first_pick == False and day not in self.queue[i].wolne:
+                    first_pick = True
+                    max_val = i
+
+            
+            for i in range(len(self.queue)):
+                if self.queue[i].energia > self.queue[max_val].energia and day not in self.queue[i].wolne:
+                    max_val = i
+            item = self.queue[max_val]
+
+            self.queue[max_val].wolne = self.queue[max_val].wolne + [day+1, day+2, day+3, day+4, day+5, day+6, day+7]
+            return item
+        
+        except IndexError:
+            print()
+            exit()
+
+    # usuwanie elementu
+    def deleteTopValue(self):
+        try:
+            max_val = 0
+            for i in range(len(self.queue)):
+                if self.queue[i].energia > self.queue[max_val].energia:
+                    max_val = i
+            item = self.queue[max_val]
+
+            del self.queue[max_val]
+            return item
+        except IndexError:
+            print()
+            exit()
+
+    def getIndex(self, index):
+        item = self.queue[i]
+        return item
+
+    def deleteIndex(self, index):
+        try:
+            for i in range(index, len(self.queue)):
+                self.queue[i-1] = self.queue[i]
+            del self.queue[len(self.queue)]
+        except IndexError:
+            print()
+            exit()
+
+
 
 # sprawdzenie ile razy musi sie zatrzymac
-def minStops(jasnosc, energia, maksBezStopu):
+def minStops(jasnosc, maksBezStopu):
     n = len(jasnosc) # ilosc punktow orientacyjnych
 
-    dp = [float('inf')] * n # dp to tabela o wielkosci n
-    dp[0] = 0 # start, zero zatrzyman
     melodia = 0 # ilosc wysluchania meloddi
-    maksEnergia = energia # maksymalna energia plaszczaka
+    trasa = []
+    i = 0
 
     # i od 0 do konca plotu
-    for i in range(0, n):
-
-        # jesli plaszczak moze wrocic do punktu 0
-        if i+maksBezStopu>=n:
-            print("MaksBezStopu = ",maksBezStopu,"\naktualne i = ",i)
-            if jasnosc[0]>jasnosc[i]:
-                print("Moze wrocic bez odpoczynku", end='')
-                return melodia
-            else:
-                print("Nie moze wrocic bez odpoczynku", end='')
-                return melodia+1
-
-        # jesli plaszczak nie moze wrocic do punktu 0
-        else:
+    while i < n:
+        # print(" i to teraz ", i)
+        # jesli plaszczak nie moze wrocic do punktu 0, czyt. dalej jest w trasie
+        if i+maksBezStopu<n:
 
             # j od aktualnego punktu do maks przejscia bez stopu
             for j in range(i+maksBezStopu ,i-1, -1):
-                print(" i to teraz ",i, " j to ",j)
+                # print(" i to teraz ", i, " j to ", j)
+
                 # istnieje sciezka bez tracenia energii
                 if jasnosc[j] > jasnosc[i]:
-                    i=j;
-                    print("Skok do swiatla w",i,"|",end='')
-                    dp[i] = min(dp[i], dp[j] + 1)
-                    break;
+                    i=j
+                    # print("Skok do swiatla w",i)
+                    trasa.append(i)
+                    break
 
                 #  nie istnieje sciezka bez tracenia energii
                 elif j == i:
-                    energia = energia - 1
                     i = i + maksBezStopu
-                    print("Skok bez swiatla w ",i,end='')
-                    if energia <= 0:
-                        energia = maksEnergia
-                        melodia = melodia + 1
-                    break;
-                else:
-                    print("skip")
-
+                    # print("Skok bez swiatla w ",i)
+                    melodia = melodia + 1
+                    trasa.append(i)
+                    break
+        
+        # jesli plaszczak moze wrocic do punktu 0
+        else:
+            #print("MaksBezStopu = ",maksBezStopu,"\naktualne i = ",i)
+            if jasnosc[0]>jasnosc[i]:
+                # print("Moze wrocic bez odpoczynku", end='')
+                break
+            else:
+                # print("Nie moze wrocic bez odpoczynku", end='')
+                melodia = melodia+1
+                break
+            
+    print("\nOptymalna trasa = [ ", end='')
+    for i in range(len(trasa)):
+        print(trasa[i], " ", end='')
+    print("] | Liczba odsluchan melodii:", trasa[0],"\n")
+    # zwraca ile razy straznik musial posluchac melodii (odpoczac)
     return melodia
 
+# main
+kolejka = KolejkaPrio()
 
 # Przykladowe dane
-energia = [3, 2, 3, 5, 0, 5, 4]
-punkty = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-jasnosc_punktow = [5, 10, 1, 7, 4, 1, 13, 12, 11, 7, 5, 3, 2, 1, 0]
-poczatkowe_punkty = [0]  # przykładowe grupy początkowych punktów
+kolejka.insert(Plaszczak(5,[1,2,3,4]))
+kolejka.insert(Plaszczak(4,[5,7]))
+kolejka.insert(Plaszczak(3,[1,2,3]))
+kolejka.insert(Plaszczak(6,[2,3,4]))
+kolejka.insert(Plaszczak(0,[2,3,4,5,6,7]))
+kolejka.insert(Plaszczak(5,[1,5,6]))
+kolejka.insert(Plaszczak(4,[7]))
+jasnosc_punktow = [5, 10, 1, 7, 4, 1, 13, 12, 11, 7, 5, 3, 2, 1, 0, 12, 5, 65, -2, -2, -2, -2, 4]
 
 ### Tworzenie losowych danych
+# print("Podaj liczbe plaszczakow")
 # for i in range(len(energia)):
 #     energia[i] = rand
 # for i in range(len(energia)):
 #     jasnosc_punktow[i] =
 
-grafik = []
-odsluchania = []
 maksBezStopu = 2
 
-for dzien in range(7):
-    poczatek = 0
-    koniec = len(energia) - dzien  # przykładowa liczba płaszczaków do wyboru
+# fukncja sprawdza minimalna ilosc odsluchan melodii w trasie
 
-    straznik = wybStraz(energia, poczatek, koniec)
+# wypisanie wartosci jasnosci punktow orientacyjnych
+print("\nPlot: [", end='')
+for i in range(len(jasnosc_punktow)-1):
+    print(jasnosc_punktow[i],", ", end='')
+print(jasnosc_punktow[len(jasnosc_punktow)-1]," ]")
+minStops(jasnosc_punktow, maksBezStopu)
 
-    minOdsluchan = minStops(jasnosc_punktow, energia[dzien], maksBezStopu)
+# wybieranie straznika na dany dzien
+ciag_pracy = True
+for i in range(1):
 
-    grafik.append(straznik)
-    odsluchania.append(minOdsluchan)
+    print("Tydzien ",i ," ma grafik: [", end = '')
+    for j in range(11):
+        # dany straznik ma urlop
+        if kolejka.getTopValue(i*7+j+1) == False:
+            print( "nie ma straznikow do wykowania pracy", end='' )
+            ciag_pracy = False
+            break
+        else:
+            print( f" id#{kolejka.getTopValue(i*7+j+1).id} ", end='' )
 
-print("\nPlot:\t Punkt =", punkty,"\nJasnosc Punktu =", jasnosc_punktow,"\n\n")
-print("\t   Grafik strazników:", grafik)
-print("Liczba odsluchan melodii:", odsluchania)
+        if ciag_pracy == False:
+            break
+    print("]")
