@@ -1,10 +1,22 @@
 # Dokumentacja do problemu 3
 
   1. informacje istnotnie w problemie:
-  #tekst
+    - ilosc płaszczaków pracujących jako strażnicy
+    - dni w ktorych płaszczaki planują urlop
+    - ilość energii każdego płaszczaka
+    - ilość odwiedzonym punktów kontrolnych którą strażnik może przejść bez zatrzymywania się
 
   2. specifikacja problemu
-  #tekst
+    Wejście:
+      Płaszczak{
+        int energia = ilość energi posiadanej przez każdego płaszczaka
+        int[] wolne = tabela dni w których płaszczak ma urlop
+      }
+      int[] oswietlenie = tabela punktow orientacyjnych wraz z ich wartosciami oswietlenia
+      int n = liczba naturalna większa od 0, oznaczająca ilość punktów kontrolnych mozliwych do przebycia bez zatrzymania
+    Wyjście:
+      Tygodniowy grafik pracy strażników zgodnie z warunkami zadania.
+      Ilosc koniecznych zatrzymań w punktach orientacyjnych w zależności od zmiennej 'n'
 
-  3. uzyte struktury i algorytmy
-  #tekst
+  3. Uzyte struktury i algorytmy
+    Struktura kolejki priorytetowej z algorytmami na usunięcie n-tego wierzchniego elementu, wierzchniego elementu oraz dodania elementu.
