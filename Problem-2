@@ -23,7 +23,7 @@ def make_list(root, s):
             root = p
         p.count += 1
 
-    # Sortowanie listy na podstawie liczby wystąpień
+    # Sortowanie listy rosnąco na podstawie liczby wystąpień
     sorted_list = None
     while root:
         p = root
@@ -37,7 +37,13 @@ def make_list(root, s):
                 q = q.next
             p.next = q.next
             q.next = p
-    
+
+    """print("Posortowana lista (znak - liczba wystąpień):")
+    p = sorted_list
+    while p:
+        print(f'\'{p.ch}\' - {p.count}')
+        p = p.next"""
+
     return sorted_list
 
 # Funkcja tworząca drzewo Huffmana z posortowanej listy węzłów
@@ -151,12 +157,14 @@ def boyer_moore_shift(w, m):
     return BM
 
 # Główna funkcja implementująca algorytm Boyera-Moore'a
-def boyer_moore(t, w, n, m):
-    BM = boyer_moore_shift(w, m)
+def boyer_moore(text, pattern):
+    n = len(text)
+    m = len(pattern)
+    BM = boyer_moore_shift(text, m)
     i = 0
     while i <= n - m:
         j = m - 1
-        while j >= 0 and t[i + j] == w[j]:
+        while j >= 0 and text[i + j] == pattern[j]:
             j -= 1
         if j < 0:
             yield i
@@ -166,14 +174,14 @@ def boyer_moore(t, w, n, m):
 
 # Funkcja zamieniająca wzorzec na podany przez użytkownika ciąg znaków
 def replace_pattern(text, pattern, replacement):
-    n = len(text)
     m = len(pattern)
-    result = list(boyer_moore(text, pattern, n, m))
+    result = list(boyer_moore(text, pattern))
 
     if not result:
         print("Nie znaleziono wzorca w tekście.")
         return text
 
+    print("Wzorzec zaczyna się w tekście na pozycjach: ", result)
     # Zamiana wszystkich wystąpień wzorca
     offset = 0
     for index in result:
@@ -189,9 +197,12 @@ def get_random_string(length):
 
 
 # Przykładowe użycie funkcji
-text = get_random_string(20)
-pattern = "ab"
-replacement = "XYZ"
+#text = get_random_string(20) + "ABC"
+#pattern = "ABC"
+#replacement = "XYZ"
+text = "ACBpoliBCASBCNXCVBDSF BSDNpoliBAS KJCJ SADH AKJCNXBZCMNBMApoliSKDJ HAKS DADS"
+pattern = "poli"
+replacement = "boli"
 print("Oryginalny tekst:", text)
 print("Wzorzec do wyszukania i zastąpienia:", pattern)
 print("Zastępstwo wzorca:", replacement)
