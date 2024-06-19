@@ -135,10 +135,11 @@ def minStops(jasnosc, maksBezStopu):
 
         # jesli plaszczak moze wrocic do punktu 0
         else:
-            if jasnosc[0]>=jasnosc[i]:
+            if jasnosc[0] >= jasnosc[i]:
                 break
             else:
                 melodia = melodia+1
+                punktyMelodia.append(0)
                 break
 
     print("\nOptymalna trasa = [ ", end='')
