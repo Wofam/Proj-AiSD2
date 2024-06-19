@@ -19,4 +19,18 @@
       Ilosc koniecznych zatrzymań w punktach orientacyjnych w zależności od zmiennej 'n'
 
   3. Uzyte struktury i algorytmy
-    Struktura kolejki priorytetowej z algorytmami na usunięcie n-tego wierzchniego elementu, wierzchniego elementu oraz dodania elementu.
+    Struktura kolejki priorytetowej z kopcem typu MAX algorytmami na usunięcie n-tego wierzchniego elementu, wierzchniego elementu oraz dodania elementu.
+    Zmodyfikowany algorytm "gąsienicy"
+
+  4. Testy
+    Dla losowych danych w zakresie:
+      len(dniWolne) = losowa liczba calkowita z zakresu ( 0 , 6 ) # dni wolne płaszczaka
+      dniWolne = len(dniWolne) losowych liczb calkowitych z zakresu ( 0 , 14 ) # możliwe dni wolne w ciągu dwóch tygodni
+      maksBezStopu = losowa liczba calkowita z zakresu ( 1 , 5 ) # liczbna punktów możliwych do minięcia bez zatrzymania się
+
+      liczbaPlaszczakow = losowa liczba całkowita z zakresu ( 4 , 10 ) # ilość pracujących płaszczaków
+
+      liczbaPunktow = losowa liczba calkowita z zakresu ( 2 , 30 ) # ilość punktów orientacyjnych
+      jasnoscPunktow = len(liczbaPunktow) liczb całkowitych z zakresu ( 1 , 100 ) # poziom oświetlenia kolejnych punktów orientacyjnych
+    
+    kod zwraca żądane wyniki
